@@ -3,20 +3,17 @@ from dash import html, dcc
 import plotly.express as px
 import pandas as pd
 
-# Sample Data
 data = {
     "City": ["Delhi", "Mumbai", "Chennai", "Kolkata", "Bangalore"],
     "Temperature": [34, 32, 36, 35, 30]
 }
 df = pd.DataFrame(data)
 
-# Create Bar Graph
+
 fig = px.bar(df, x="City", y="Temperature", color="City", title="City-wise Temperature")
 
-# Initialize Dash App
 app = dash.Dash(__name__)
 
-# App Layout
 app.layout = html.Div(children=[
     html.H1("Weather Dashboard", style={'textAlign': 'center'}),
 
