@@ -11,8 +11,24 @@
 
 *MENTOR*: NEELA SANTOSH
 
-##I worked on a project focused on API Integration and Data Visualization,  The main goal of the task was to fetch real-time or sample data using a public API and convert that data into meaningful visual representations to enhance user understanding and interaction. This project was completed using Python, and the development environment I chose for this project was Visual Studio Code (VS Code), which provided a smooth and efficient workflow. For the API integration and visualization, IAlthough the instructions using a public API from OpenWeatherMap,  I created a static dataset that mimics real-world weather data to build the initial structure and flow of the project. The dataset was constructed using the pandas library, and it included temperature data for five major Indian cities: Delhi, Mumbai, Chennai, Kolkata, and Bangalore. Each city was assigned a sample temperature value, and this structured data was stored in a DataFrame, which served as the input for the visualization.
+##Weather Dashboard with Streamlit & OpenWeatherMap API
+This project is a Weather Dashboard built using Python and Streamlit. It integrates with the OpenWeatherMap API to fetch real-time weather data, and uses Matplotlib for data visualization. The dashboard displays current weather conditions along with mock historical trends for temperature, humidity, and precipitation.
 
-#OUTPUT
+Features
+Fetch real-time weather data from OpenWeatherMap
+Visualize temperature, humidity, and precipitation trends using Matplotlib
+Generate mock historical data based on current weather
+Download weather data as a CSV file
+Simple and responsive Streamlit UI
+Error handling and API key protection using .env file
+Caching with @st.cache_data for better performance.
+Technologies Used
+Python
+Streamlit
+Matplotlib
+OpenWeatherMap API
+pandas
+Run the Weather Dashboard Start the app using Streamlit: streamlit run app.py # replace filename with app.py You should see a new tab open in your browser at http://localhost:8501, showing the weather dashboard.
 
-![Image](https://github.com/user-attachments/assets/b67afe9e-9c09-41cc-aca8-34a1a6c87879) 
+First copy the path of the app.py, i.e., your saved code location. Then open cmd or Terminal and Enter: cd path of file #Replace your file path then press Enter. Then again type streamlit run app.py #Replace app with your filename then press Enter. You should see a new tab open in your browser at http://localhost:8501, showing the weather dashboard.
+
