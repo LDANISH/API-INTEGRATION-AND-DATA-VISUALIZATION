@@ -31,5 +31,13 @@ pandas
 ##Run the Weather Dashboard Start the app using Streamlit: streamlit run app.py # replace filename with app.py You should see a new tab open in your browser at http://localhost:8501, showing the weather dashboard.
 
 First copy the path of the app.py, i.e., your saved code location. Then open cmd or Terminal and Enter: cd path of file #Replace your file path then press Enter. Then again type streamlit run app.py #Replace app with your filename then press Enter. You should see a new tab open in your browser at http://localhost:8501, showing the weather dashboard.
-##OUTPUT
+##OUTPUT 
+
+![Image](https://github.com/user-attachments/assets/355139b1-0170-4df8-a651-25b941fd20c2)
+
+
+![Image](https://github.com/user-attachments/assets/22b9d3dc-7e5a-4caf-850b-9e1e96711794)
+
+
+![Image](https://github.com/user-attachments/assets/ae11e425-b553-4b49-8a13-c99f186d2b91)
 
