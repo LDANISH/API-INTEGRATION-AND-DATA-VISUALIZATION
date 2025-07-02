@@ -1,57 +1,151 @@
-import requests
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-API_KEY = "7e4128d633b0f30828206c807d2170bb"
-BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
+import streamlit as st               
+import requests                      
+import pandas as pd                   
+import datetime                      
+import random                         
+import matplotlib.pyplot as plt        
 
-cities = ["Delhi", "Mumbai", "Chennai", "Kolkata", "Bangalore", "Hyderabad", "Pune"]
-weather_data = []
+API_KEY = "7e4128d633b0f30828206c807d2170bb"  
+BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
+UNITS = "metric"
+CACHE_TTL = 600
+DEFAULT_CITIES = ["London", "New York", "Tokyo", "Paris", "Sydney"]
 
-for city in cities:
-    params = {
-        'q': city,
-        'appid': API_KEY,
-        'units': 'metric'
-    }
+WEATHER_EMOJIS = {
+    "clear": "☀️",
+    "clouds": "☁️",
+    "rain": "🌧️",
+    "thunderstorm": "⛈️",
+    "snow": "❄️",
+    "mist": "🌫️",
+    "drizzle": "🌦️",
+    "fog": "🌁",
+    "haze": "😶‍🌫️"
+}
+
+st.set_page_config(
+    page_title="Weather Dashboard",
+    page_icon="🌦️",
+    layout="centered",
+    initial_sidebar_state="expanded"
+)
+
+
+def get_api_key():
+    if not API_KEY:
+        st.error("API key not found. Please add your key to the script.")
+        st.stop()
+    return API_KEY
+
+
+@st.cache_data(ttl=CACHE_TTL)
+def fetch_weather_data(city_name):
+    api_key = get_api_key()
+    params = {'q': city_name, 'appid': api_key, 'units': UNITS}
+    
     try:
-        response = requests.get(BASE_URL, params=params)
-        data = response.json()
+        response = requests.get(BASE_URL, params=params, timeout=10)
+        if response.status_code == 404:
+            st.error(f"City '{city_name}' not found.")
+            return None
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        st.error(f"Network error: {str(e)}")
+        return None
 
-        if response.status_code == 200:
-            weather_data.append({
-                'City': city,
-                'Temperature (°C)': data['main']['temp'],
-                'Humidity (%)': data['main']['humidity'],
-                'Weather': data['weather'][0]['main']
-            })
-        else:
-            print(f"Error fetching data for {city}: {data.get('message', 'Unknown error')}")
-    except Exception as e:
-        print(f"Exception occurred while fetching data for {city}: {e}")
+def display_weather_card(data):
+    weather = data["weather"][0]
+    main = data["main"]
+    wind = data["wind"]
+    condition = weather["main"].lower()
+    emoji = WEATHER_EMOJIS.get(condition, "🌫️")
 
-
-if not weather_data:
-    print("No weather data fetched. Please check your API key or network connection.")
-else:
-
-    df = pd.DataFrame(weather_data)
-
-   
-    sns.set(style="whitegrid")
+    st.subheader(f"{emoji} Current Weather in {data['name']}")
     
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Temperature", f"{main['temp']:.1f} °C")
+        st.metric("Humidity", f"{main['humidity']}%")
+    with col2:
+        st.metric("Feels Like", f"{main['feels_like']:.1f} °C")
+        st.metric("Pressure", f"{main['pressure']} hPa")
+    with col3:
+        st.metric("Wind Speed", f"{wind['speed']} m/s")
+        st.metric("Conditions", weather["description"].title())
 
-    
-    sns.barplot(x='City', y='Temperature (°C)', data=df, ax=axes[0], palette='coolwarm')
-    axes[0].set_title('Temperature in Cities')
-    axes[0].set_xticklabels(df['City'], rotation=45)
+def generate_mock_history(base_temp, base_humidity, days=5):
+    dates = [(datetime.datetime.now() - datetime.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(days, 0, -1)]
+    return pd.DataFrame({
+        "Date": dates,
+        "Temperature": [round(base_temp + random.uniform(-3, 3), 1) for _ in dates],
+        "Humidity": [max(30, min(100, base_humidity + random.randint(-15, 15))) for _ in dates],
+        "Precipitation": [round(random.uniform(0, 10), 1) for _ in dates]
+    })
 
-    
-    sns.barplot(x='City', y='Humidity (%)', data=df, ax=axes[1], palette='Blues_d')
-    axes[1].set_title('Humidity in Cities')
-    axes[1].set_xticklabels(df['City'], rotation=45)
 
+def create_matplotlib_visualizations(df):
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 12))
     
+    ax1.plot(df["Date"], df["Temperature"], 'r-o')
+    ax1.fill_between(df["Date"], df["Temperature"], alpha=0.1, color='red')
+    ax1.set_title("Temperature Trend (°C)")
+    ax1.grid(True)
+
+    ax2.plot(df["Date"], df["Humidity"], 'b-o')
+    ax2.fill_between(df["Date"], df["Humidity"], alpha=0.1, color='blue')
+    ax2.set_title("Humidity Trend (%)")
+    ax2.grid(True)
+
+    ax3.bar(df["Date"], df["Precipitation"], color='skyblue')
+    ax3.set_title("Precipitation (mm)")
+    ax3.grid(True)
+
     plt.tight_layout()
-    plt.show()
+    st.pyplot(fig)
+
+# --- Main App Function ---
+def main():
+    st.title("🌦️ Weather Dashboard")
+
+    if "city" not in st.session_state:
+        st.session_state.city = "London"
+
+    with st.sidebar:
+        st.header("Quick Access")
+        for city in DEFAULT_CITIES:
+            if st.button(city):
+                st.session_state.city = city
+
+    city = st.text_input("Enter city name:", st.session_state.city).strip()
+    st.session_state.city = city
+
+    if st.button("Get Weather"):
+        with st.spinner("Fetching weather data..."):
+            weather_data = fetch_weather_data(city)
+            if weather_data:
+                display_weather_card(weather_data)
+
+                st.divider()
+                st.subheader("📈 Historical Trends")
+
+                mock_data = generate_mock_history(
+                    base_temp=weather_data["main"]["temp"],
+                    base_humidity=weather_data["main"]["humidity"]
+                )
+                create_matplotlib_visualizations(mock_data)
+
+                st.download_button(
+                    label="📥 Download Data",
+                    data=mock_data.to_csv(index=False),
+                    file_name=f"{city}_weather.csv"
+                )
+            else:
+                st.info("Please enter a valid city name to view the weather data.")
+
+
+if __name__ == "__main__":
+    main()
+
+      
+ 
